@@ -1,0 +1,121 @@
+#!/usr/bin/python3
+from sys import argv
+import os
+import chemistry
+import molecules
+
+
+def help():
+    print('getmass: gives the molecular mass of a molecule. Syntax: "getmass [element]".')
+    print('convert: converts an amount of a matter depending on the unit. Syntax: "convert [amount] [unit] [molecule]".')
+    print('preassure: converts the unit of a specific preassure. Syntax: "preassure [amount] [initial unit] [final unit]".')
+    print('|available units are: "atm, PSI, Pa, kPa, Bar and torr".')
+    print('energy: converts the unit of a specific amount of energy. Syntax: "energy [amount] [initial unit] [final unit]".')
+    print('atomicnumber: gives the atomic number of an element. Syntax: "atomicnumber [element]".')
+    print('ect: prints the electron configuration table.')
+    print('econfig: gives the electron configuration of a specific element. Syntax: "econfig [element]".')
+    print('showtable: highlights an element on the periodic table. Syntax: "showtable [element]"".')
+    print('molecule: Shows the saved in molecules in the Molecule module.')
+    print('calc: Does basic arithmatic calculations. Syntax: "calc [num1] [operation] [num2]".')
+    print('name: gives the name of an element, name H will output Hydrogen.')
+    print('clear: clears the terminal.')
+    print('exit: closes the terminal.')
+
+def default():
+    print('Invalid command! try: getmass, convert, preassure, energy, calc, atomicnumber, molecule, showtable, name, clear, exit.')
+
+def calc(input, specific):
+    r = 2
+    print(input)
+    n1 = float(input[1])
+    n2 = float(input[3])
+    op = input[2]
+    if specific == True:
+        r = 9
+    if op == '+':
+        result = n1 + n2
+    if op == '-':
+        result = n1 - n2
+    if op == '*':
+        result = n1 * n2
+    if op == '/':
+        if n2 == 0:
+            print('Cannot divide by zero!')
+            return                   
+        result = n1 / n2
+    return round(result, r)
+
+def get_func(input):
+        result = 'null'
+        specific = False
+        
+
+        keywords = ['', 'for', 'in', 'to', 'of', ' ']
+        for element in input:
+            if element in keywords:
+                input.remove(element)
+            if '-s' in input:
+                input.remove('-s')
+                specific = True
+
+        if len(input) == 1:
+            print('No input recieved!')
+            return
+        func = input[1]
+        x = input[1:]
+        actions = {
+            'getmass': chemistry.get_molecular_mass,
+            'mass': chemistry.get_molecular_mass, #Dublicate
+            'preassure': chemistry.preassure_unit_conversion,
+            'pressure': chemistry.preassure_unit_conversion, #Dublicate
+            'convert': chemistry.unit_conversion,
+            'energy': chemistry.energy_conversion,
+            'temp': chemistry.temp_change,
+            'showtable': chemistry.show_element,
+            'atomicnumber': chemistry.get_atomic_number,
+            'econf': chemistry.econfig,
+            'ect': chemistry.ect,
+            'name': chemistry.get_name,
+            'whatis': molecules.whatis,
+            'molecule': molecules.molecule,
+            'calc': calc,
+            'help': help,
+            }
+        
+        arguments = {
+            'getmass': 1,
+            'mass': 1, #Dublicate
+            'preassure': 3,
+            'pressure': 3, #Dublicate
+            'convert': 3,
+            'energy': 3,
+            'temp':   3,
+            'showtable': 1, 
+            'econf': 1,
+            'whatis': 1,
+            'atomicnumber': 1,
+            'name': 1,
+            'calc': 3,
+            }
+
+        action = actions.get(input[1], default)
+        args = arguments.get(input[1], 0)
+        if func == 'calc':
+            print(action(x, specific) if len(input[2:]) == args else print('Invalid arguments!'))
+            return
+        elif func == 'showtable' or func == 'ect' or func == 'econf':
+            action(input[2]) if len(input) == 3 else action()
+            return
+        elif args == 1:
+            if func == 'mass' or func == 'getmass':
+                print(action(*input[2:], True)) if len(input[2:]) == 1 else print('Invalid arguments!')
+                return
+            print(action(*input[2:])) if len(input[2:]) == 1 else print('Invalid arguments!')
+            return
+        if args == 0:
+            action()
+            return
+        print(action(*input[2:], specific, True)) if len(input[2:]) == args else print('Invalid arguments!')
+
+if __name__ == '__main__':  
+    get_func(argv)
